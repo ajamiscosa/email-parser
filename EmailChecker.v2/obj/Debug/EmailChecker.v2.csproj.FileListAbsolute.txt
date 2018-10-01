@@ -1,0 +1,16 @@
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\EmailChecker.v2.exe.config
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\EmailChecker.v2.exe
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\EmailChecker.v2.pdb
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\WebDriver.dll
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\WebDriver.xml
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.csprojResolveAssemblyReference.cache
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.Properties.Resources.resources
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.csproj.GenerateResource.Cache
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.exe
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.pdb
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\geckodriver.exe
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\SeleniumExtras.WaitHelpers.dll
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\chromedriver.exe
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.Main.resources
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\SwingWERX.dll
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\SwingWERX.pdb
