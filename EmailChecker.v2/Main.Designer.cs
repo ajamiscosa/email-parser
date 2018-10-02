@@ -35,17 +35,19 @@
             this.txtPassword = new SwingWERX.Controls.InputBox(this.components);
             this.txtPath = new SwingWERX.Controls.InputBox(this.components);
             this.btnProcess = new System.Windows.Forms.Button();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Location = new System.Drawing.Point(12, 86);
+            this.label1.Location = new System.Drawing.Point(12, 87);
             this.label1.Margin = new System.Windows.Forms.Padding(0);
-            this.label1.MaximumSize = new System.Drawing.Size(0, 2);
+            this.label1.MaximumSize = new System.Drawing.Size(313, 2);
+            this.label1.MinimumSize = new System.Drawing.Size(313, 2);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(312, 2);
+            this.label1.Size = new System.Drawing.Size(313, 2);
             this.label1.TabIndex = 3;
             // 
             // btnChooseFile
@@ -90,7 +92,7 @@
             // btnProcess
             // 
             this.btnProcess.Font = new System.Drawing.Font("Segoe UI", 12.5F);
-            this.btnProcess.Location = new System.Drawing.Point(11, 133);
+            this.btnProcess.Location = new System.Drawing.Point(11, 173);
             this.btnProcess.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnProcess.Name = "btnProcess";
             this.btnProcess.Size = new System.Drawing.Size(314, 32);
@@ -99,11 +101,19 @@
             this.btnProcess.UseVisualStyleBackColor = true;
             this.btnProcess.Click += new System.EventHandler(this.StartProcess);
             // 
+            // progressBar
+            // 
+            this.progressBar.Location = new System.Drawing.Point(12, 135);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(312, 32);
+            this.progressBar.TabIndex = 11;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(336, 174);
+            this.ClientSize = new System.Drawing.Size(336, 216);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnProcess);
             this.Controls.Add(this.txtPath);
             this.Controls.Add(this.txtPassword);
@@ -128,6 +138,7 @@
         private SwingWERX.Controls.InputBox txtPassword;
         private SwingWERX.Controls.InputBox txtPath;
         private System.Windows.Forms.Button btnProcess;
+        private System.Windows.Forms.ProgressBar progressBar;
     }
 }
 

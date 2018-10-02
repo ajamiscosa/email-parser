@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +12,8 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.Interactions;
 using SeleniumExtras.WaitHelpers;
+using System.Diagnostics;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace EmailChecker.v2
 {
@@ -127,6 +129,8 @@ namespace EmailChecker.v2
             IWebElement searchButton = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/button", TargetType.XPATH);
             IWebElement proxyServer = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[1]/select", TargetType.XPATH);
 
+            searchField.Clear();
+
             Actions actions = new Actions(_driver);
             actions
                 .Click(proxyServer)
@@ -158,9 +162,10 @@ namespace EmailChecker.v2
                 IWebElement headerEle = element.FindElement(By.ClassName("r"));
                 String headerLinkText = headerEle.Text;
 
-                IWebElement contentEle = element.FindElement(By.CssSelector("div.s"));
-                String url = contentEle.FindElement(By.TagName("cite")).Text;
-                String content = contentEle.FindElement(By.ClassName("st")).Text;
+                String url = element.FindElement(By.TagName("cite")).Text;
+
+                IWebElement contentEle = element.FindElement(By.ClassName("r"));
+                String content = element.FindElement(By.ClassName("st")).Text;
 
                 if ((content.Contains(companyString) || companyArray.Any(content.Contains)) && headerLinkText.Contains(lastName) && headerLinkText.Contains(firstName))
                 {
@@ -227,6 +232,10 @@ namespace EmailChecker.v2
         /// <param name="e"></param>
         private void StartProcess(object sender, EventArgs e)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
+            StringBuilder sb = new StringBuilder();
 
             String username = txtUsername.Text;
             String password = txtPassword.Text;
@@ -268,9 +277,11 @@ namespace EmailChecker.v2
             outputDataTable.Columns.Add("IsPublic");
             outputDataTable.Columns.Add("ReferenceLink");
             outputDataTable.Columns.Add("LinkedInLocation");
-            
+
             // Step 3. Iterate through input.
             // We'll start at index 1 to skip the header row at index 0.
+            progressBar.Maximum = sourceDataTable.Rows.Count - 1;
+
             for (int i = 1; i < sourceDataTable.Rows.Count; i++)
             {
                 DataRow entry = sourceDataTable.Rows[i];
@@ -288,42 +299,56 @@ namespace EmailChecker.v2
                 {
                     newRow[0] = "N";
                     newRow[1] = "N/A";
+                    
                 }
                 else
                 {
-                    if (IsEmailPublic(emailAddress))
+                    newRow[0] = IsEmailPublic(emailAddress) ? "Y" : "N";
+                    newRow[1] = _foundUrl.IsNullOrEmptyOrWhiteSpace()?"N/A":_foundUrl;
+                    
+                    try
                     {
-                        newRow[0] = "Y";
-                        newRow[1] = _foundUrl;
+                        String linkedInURL = SearchLinkedInURL(firstName, lastName, companyName);
+                        String location = GetLinkedInLocation(linkedInURL);
 
-                        try
-                        {
-                            String linkedInURL = SearchLinkedInURL(firstName, lastName, companyName);
-                            String location = GetLinkedInLocation(linkedInURL);
-
-                            newRow[2] = location;
-                        }
-                        catch (NotFoundException notfound)
-                        {
-                            newRow[2] = "N/A";
-                        }
-
-                        //String linkedInURL = SearchLinkedInURL(firstName, lastName, companyName);
-                        //String location = GetLinkedInLocation(linkedInURL);
-
-                        //newRow[2] = location;
+                        newRow[2] = String.Format("\"{0}\"",location);
                     }
-                    else
+                    catch (NotFoundException notfound)
                     {
-                        newRow[0] = "N";
-                        newRow[1] = "N/A";
+                        newRow[2] = "N/A";
                     }
                 }
                 Console.Write("\t{0}\t{1}\t{2}\n", newRow[0], newRow[1], newRow[2]);
                 outputDataTable.Rows.Add(newRow);
+                progressBar.Value++;
+
+                if(i%50==0)
+                {
+                    save(outputDataTable, sb);
+                }
+            }
+            
+
+            
+            stopwatch.Stop();
+
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+        }
+
+        async private void save(DataTable dt, StringBuilder sb)
+        {
+
+            IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
+                                              Select(column => column.ColumnName);
+            sb.AppendLine(string.Join(",", columnNames));
+
+            foreach (DataRow row in dt.Rows)
+            {
+                IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
+                sb.AppendLine(string.Join(",", fields));
             }
 
-            util.WriteDataTableToExcel(outputDataTable, "Sheet 1", @"D:\out.xlsx");
+            File.WriteAllText(@"D:\test.csv", sb.ToString());
         }
     }
 }

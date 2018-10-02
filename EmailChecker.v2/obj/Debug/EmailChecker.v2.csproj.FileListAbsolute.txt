@@ -14,3 +14,5 @@ C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChec
 C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.Main.resources
 C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\SwingWERX.dll
 C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\SwingWERX.pdb
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\Debug\EmailChecker.v2.SpreadsheetForm.resources
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\Debug\Resources\fa-brands-400.ttf
