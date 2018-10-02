@@ -232,9 +232,14 @@ namespace EmailChecker.v2
         /// <param name="e"></param>
         private void StartProcess(object sender, EventArgs e)
         {
+            Console.WriteLine(DoProcess());
+        }
+
+        async Task<long> DoProcess()
+        {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            
+
             StringBuilder sb = new StringBuilder();
 
             String username = txtUsername.Text;
@@ -242,16 +247,16 @@ namespace EmailChecker.v2
 
             String path = txtPath.Text;
 
-            if(username.IsNullOrEmptyOrWhiteSpace() || password.IsNullOrEmptyOrWhiteSpace())
+            if (username.IsNullOrEmptyOrWhiteSpace() || password.IsNullOrEmptyOrWhiteSpace())
             {
                 MessageBox.Show("Valid LinkedIn account is required", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                return -1;
             }
 
             if (path.IsNullOrEmptyOrWhiteSpace())
             {
                 MessageBox.Show("Input Excel file is required!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                return -1;
             }
 
 
@@ -263,7 +268,7 @@ namespace EmailChecker.v2
             //service.HideCommandPromptWindow = true;
 
             _driver = new ChromeDriver(service, options);
-            
+
             // LinkedIn Location Verification.
             // Step 1. Login to LinkedIn.
             LoginToLinkedIn(username, password);
@@ -274,6 +279,11 @@ namespace EmailChecker.v2
 
             // Prepare output datatable.
             DataTable outputDataTable = new DataTable();
+            outputDataTable.Columns.Add("FirstName");
+            outputDataTable.Columns.Add("LastName");
+            outputDataTable.Columns.Add("Email");
+            outputDataTable.Columns.Add("Company");
+            outputDataTable.Columns.Add("Title");
             outputDataTable.Columns.Add("IsPublic");
             outputDataTable.Columns.Add("ReferenceLink");
             outputDataTable.Columns.Add("LinkedInLocation");
@@ -283,60 +293,72 @@ namespace EmailChecker.v2
             progressBar.Maximum = sourceDataTable.Rows.Count - 1;
 
             for (int i = 1; i < sourceDataTable.Rows.Count; i++)
+            //for (int i = 1; i < 11; i++)
             {
                 DataRow entry = sourceDataTable.Rows[i];
-                String firstName    = entry[0].ToString();
-                String lastName     = entry[1].ToString();
+                String firstName = entry[0].ToString();
+                String lastName = entry[1].ToString();
                 String emailAddress = entry[2].ToString();
-                String companyName  = entry[3].ToString();
+                String companyName = entry[3].ToString();
+                String title = entry[4].ToString();
 
                 Console.Write("{0} {1} | {2}: ", firstName, lastName, emailAddress);
                 // Step 4. Check Google if email is publicly available.
                 // If email is not public, skip.
                 // While you're at it, well, fill the output data set as you go through each.
                 DataRow newRow = outputDataTable.NewRow();
-                if(emailAddress.IsNullOrEmptyOrWhiteSpace())
+                newRow[0] = firstName;
+                newRow[1] = lastName;
+                newRow[2] = emailAddress;
+                newRow[3] = companyName;
+                newRow[4] = title;
+
+                if (emailAddress.IsNullOrEmptyOrWhiteSpace())
                 {
-                    newRow[0] = "N";
-                    newRow[1] = "N/A";
-                    
+                    newRow[5] = "N";
+                    newRow[6] = "N/A";
+
                 }
                 else
                 {
-                    newRow[0] = IsEmailPublic(emailAddress) ? "Y" : "N";
-                    newRow[1] = _foundUrl.IsNullOrEmptyOrWhiteSpace()?"N/A":_foundUrl;
-                    
+                    newRow[5] = IsEmailPublic(emailAddress) ? "Y" : "N";
+                    newRow[6] = _foundUrl.IsNullOrEmptyOrWhiteSpace() ? "N/A" : _foundUrl;
+
                     try
                     {
                         String linkedInURL = SearchLinkedInURL(firstName, lastName, companyName);
                         String location = GetLinkedInLocation(linkedInURL);
 
-                        newRow[2] = String.Format("\"{0}\"",location);
+                        newRow[7] = String.Format("\"{0}\"", location);
                     }
                     catch (NotFoundException notfound)
                     {
-                        newRow[2] = "N/A";
+                        newRow[7] = "N/A";
                     }
                 }
-                Console.Write("\t{0}\t{1}\t{2}\n", newRow[0], newRow[1], newRow[2]);
+                Console.Write("\t{0}\t{1}\t{2}\n", newRow[5], newRow[6], newRow[7]);
                 outputDataTable.Rows.Add(newRow);
                 progressBar.Value++;
 
-                if(i%50==0)
+                if (i % 50 == 0)
                 {
-                    save(outputDataTable, sb);
+                    bool isOk = await SaveCSV(outputDataTable);
                 }
             }
-            
 
-            
+
+            Console.WriteLine("{0}", await SaveCSV(outputDataTable)?"Completed":"Error");
+
             stopwatch.Stop();
 
-            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            return stopwatch.ElapsedMilliseconds;
         }
 
-        async private void save(DataTable dt, StringBuilder sb)
+        async Task<bool> SaveCSV(DataTable dt)
         {
+            Console.WriteLine("Saving...");
+
+            StringBuilder sb = new StringBuilder();
 
             IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
                                               Select(column => column.ColumnName);
@@ -348,7 +370,13 @@ namespace EmailChecker.v2
                 sb.AppendLine(string.Join(",", fields));
             }
 
-            File.WriteAllText(@"D:\test.csv", sb.ToString());
+            using (TextWriter w = new StreamWriter(new BufferedStream(new FileStream(@"D:\test.csv", FileMode.Create))))
+            {
+                w.WriteLine(sb.ToString());
+                w.Flush();
+            }
+
+            return true;
         }
     }
 }
