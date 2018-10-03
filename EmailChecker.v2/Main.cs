@@ -58,37 +58,38 @@ namespace EmailChecker.v2
 
         private bool IsEmailPublic(String emailAddress)
         {
-            _driver.Url = "https://www.proxysite.com/";
-            WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
-
-            IWebElement searchField = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/input", TargetType.XPATH);
-            IWebElement searchButton = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/button", TargetType.XPATH);
-            IWebElement proxyServer = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[1]/select", TargetType.XPATH);
-
-            searchField.Clear();
-
-            Actions actions = new Actions(_driver);
-            actions
-                .Click(proxyServer)
-                .SendKeys(proxyServer, "US")
-                .SendKeys("\n")
-                .SendKeys(searchField, "google.com")
-                .Click(searchButton)
-                .Perform();
-
-            IWebElement googleSearchField = _driver.FindElementByXPath("/html/body/div[4]/div[4]/form/div[2]/div/div[1]/div/div[1]/input");
-            IWebElement googleSearchButton = _driver.FindElementByXPath("/html/body/div[4]/div[4]/form/div[2]/div/div[3]/center/input[1]");
-
-            actions = new Actions(_driver);
-            actions
-                .SendKeys(googleSearchField, emailAddress)
-                .Click(googleSearchButton)
-                .Perform();
-
+            isapa:
             try
             {
-                // Clear last found url.
-                _foundUrl = String.Empty;
+                _driver.Url = "https://www.proxysite.com/";
+                WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
+
+                IWebElement searchField = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/input", TargetType.XPATH);
+                IWebElement searchButton = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/button", TargetType.XPATH);
+                IWebElement proxyServer = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[1]/select", TargetType.XPATH);
+
+                searchField.Clear();
+
+                Actions actions = new Actions(_driver);
+                actions
+                    .Click(proxyServer)
+                    .SendKeys(proxyServer, "US")
+                    .SendKeys("\n")
+                    .SendKeys(searchField, "google.com")
+                    .Click(searchButton)
+                    .Perform();
+
+                IWebElement googleSearchField = _driver.FindElementByXPath("/html/body/div[4]/div[4]/form/div[2]/div/div[1]/div/div[1]/input");
+                IWebElement googleSearchButton = _driver.FindElementByXPath("/html/body/div[4]/div[4]/form/div[2]/div/div[3]/center/input[1]");
+
+                actions = new Actions(_driver);
+                actions
+                    .SendKeys(googleSearchField, emailAddress)
+                    .Click(googleSearchButton)
+                    .Perform();
+                
+                    // Clear last found url.
+                    _foundUrl = String.Empty;
 
                 // Find .srg from current page.
                 IWebElement container = _driver.FindElementByClassName("srg");
@@ -96,14 +97,14 @@ namespace EmailChecker.v2
                 {
                     IWebElement headerEle = element.FindElement(By.ClassName("r"));
                     String headerLinkText = headerEle.Text;
-                    
+
                     String url = element.FindElement(By.TagName("cite")).Text;
 
                     IWebElement contentEle = element.FindElement(By.ClassName("r"));
                     String content = element.FindElement(By.ClassName("st")).Text;
 
                     String[] emailElements = emailAddress.Split('@');
-                
+
                     if (content.Contains(emailAddress))
                     {
                         // Store matched url and return true.
@@ -111,74 +112,190 @@ namespace EmailChecker.v2
                         return true;
                     }
                 }
-                // If it reached outside the loop, well, it didn't found any matches.
-                return false;
             }
             catch (NoSuchElementException e)
             {
                 return false;
             }
+            catch (WebDriverException webException)
+            {
+                Console.WriteLine("Loading Timeout. Retrying...");
+                goto isapa;
+            }
+
+            // If it reached outside the loop, well, it didn't found any matches.
+            return false;
         }
 
         private String SearchLinkedInURL(String firstName, String lastName, object companyName)
         {
-            _driver.Url = "https://www.proxysite.com/";
-            WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
-
-            IWebElement searchField = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/input", TargetType.XPATH);
-            IWebElement searchButton = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/button", TargetType.XPATH);
-            IWebElement proxyServer = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[1]/select", TargetType.XPATH);
-
-            searchField.Clear();
-
-            Actions actions = new Actions(_driver);
-            actions
-                .Click(proxyServer)
-                .SendKeys(proxyServer, "US")
-                .SendKeys("\n")
-                .SendKeys(searchField, "google.com")
-                .Click(searchButton)
-                .Perform();
-
-            IWebElement googleSearchField = FindObjectBy("/html/body/div[4]/div[4]/form/div[2]/div/div[1]/div/div[1]/input", TargetType.XPATH);
-            IWebElement googleSearchButton = FindObjectBy("/html/body/div[4]/div[4]/form/div[2]/div/div[3]/center/input[1]", TargetType.XPATH);
-            
-            //stringArray.Any(stringToCheck.Contains)
-            String companyString = companyName.ToString();
-            String[] companyArray = new String[] { };
-            companyArray = companyString.Split(' ');
-
-
-            String searchCriteria = String.Format("site:linkedin.com/in {{ {0} {1} and {2} }}", firstName, lastName, companyString);
-            actions = new Actions(_driver);
-            actions
-                .SendKeys(googleSearchField, searchCriteria)
-                .Click(googleSearchButton)
-                .Perform();
-
-            IWebElement container = _driver.FindElementByClassName("srg");
-            foreach (IWebElement element in container.FindElements(By.ClassName("g")))
+            Console.WriteLine("Starting LinkedIn Search");
+            isapa:
+            try
             {
-                IWebElement headerEle = element.FindElement(By.ClassName("r"));
-                String headerLinkText = headerEle.Text;
+                Console.WriteLine("Loading ProxySite");
+                _driver.Url = "https://www.proxysite.com/";
 
-                String url = element.FindElement(By.TagName("cite")).Text;
+                Console.WriteLine("Initializing Web Driver");
+                WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
 
-                IWebElement contentEle = element.FindElement(By.ClassName("r"));
-                String content = element.FindElement(By.ClassName("st")).Text;
 
-                if ((content.Contains(companyString) || companyArray.Any(content.Contains)) && headerLinkText.Contains(lastName) && headerLinkText.Contains(firstName))
+                Console.WriteLine("Loading ProxySite Fields");
+                IWebElement searchField = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/input", TargetType.XPATH);
+                IWebElement searchButton = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[2]/button", TargetType.XPATH);
+                IWebElement proxyServer = FindObjectBy("/html/body/div[1]/main/div[1]/div/div[3]/form/div[1]/select", TargetType.XPATH);
+
+                Console.WriteLine("Reset Search Field");
+                searchField.Clear();
+
+
+                Console.WriteLine("Do Navigation Actions");
+                Actions actions = new Actions(_driver);
+                actions
+                    .Click(proxyServer)
+                    .SendKeys(proxyServer, "US")
+                    .SendKeys("\n")
+                    .SendKeys(searchField, "google.com")
+                    .Click(searchButton)
+                    .Perform();
+
+                Console.WriteLine("Wait for Google Search");
+                IWebElement googleSearchField = FindObjectBy("/html/body/div[4]/div[4]/form/div[2]/div/div[1]/div/div[1]/input", TargetType.XPATH);
+                IWebElement googleSearchButton = FindObjectBy("/html/body/div[4]/div[4]/form/div[2]/div/div[3]/center/input[1]", TargetType.XPATH);
+
+                //stringArray.Any(stringToCheck.Contains)
+                String companyString = companyName.ToString();
+                String[] companyArray = new String[] { };
+                companyArray = companyString.Split(' ');
+
+
+                Console.WriteLine("Enter Search Criteria");
+                String searchCriteria = String.Format("site:linkedin.com/in {{ {0} {1} and {2} }}", firstName, lastName, companyString);
+                actions = new Actions(_driver);
+                actions
+                    .SendKeys(googleSearchField, searchCriteria)
+                    .Click(googleSearchButton)
+                    .Perform();
+
+                Console.WriteLine("Initialize Container Element to Null");
+                IWebElement container = null;
+
+                try
                 {
-                    return url;
+                    Console.WriteLine("Find SRG.");
+                    container = _driver.FindElementByClassName("srg");
+                }
+                catch (NoSuchElementException exc)
+                {
+                    foreach (IWebElement element in _driver.FindElements(By.ClassName("g")))
+                    {
+                        try
+                        {
+                            IWebElement headerEle = element.FindElement(By.ClassName("r"));
+                            String headerLinkText = headerEle.Text;
+
+                            String url = element.FindElement(By.TagName("cite")).Text;
+
+                            IWebElement contentEle = element.FindElement(By.ClassName("r"));
+                            String content = element.FindElement(By.ClassName("st")).Text;
+
+                            if (headerLinkText.Contains(lastName) && headerLinkText.Contains(firstName))
+                            {
+                                if (content.Contains(companyString))
+                                {
+                                    return url;
+                                }
+                                string[] excludedWords = new string[] { "and", "&", "-", ".", ",", "/", "\\", "@", "+" };
+
+                                var splitted = content.Split(' ');
+                                var result = splitted.Except(excludedWords);
+
+                                foreach (String s in result)
+                                {
+                                    String term = s.Trim();
+                                    if (content.Contains(term))
+                                    {
+                                        return url;
+                                    }
+                                }
+                                return url;
+                            }
+                        }
+                        catch (NoSuchElementException noEle)
+                        {
+                            Console.WriteLine(noEle.InnerException);
+                            Console.WriteLine(noEle.StackTrace);
+                        }
+                    }
+                }
+                catch(WebDriverException webdrvex)
+                {
+                    Console.WriteLine("WebDriverException on finding SRG.");
+                }
+
+
+                Console.WriteLine("SRG Found. Go through each.");
+                foreach (IWebElement element in container.FindElements(By.ClassName("g")))
+                {
+                    try
+                    {
+                        Console.WriteLine("Find R.");
+                        IWebElement headerEle = element.FindElement(By.ClassName("r"));
+                        String headerLinkText = headerEle.Text;
+
+                        Console.WriteLine("Find CITE.");
+                        String url = element.FindElement(By.TagName("cite")).Text;
+
+
+                        Console.WriteLine("Load Content");
+                        IWebElement contentEle = element.FindElement(By.ClassName("r"));
+                        String content = element.FindElement(By.ClassName("st")).Text;
+
+
+                        Console.WriteLine("Check if Content Contains Person Name");
+                        if (headerLinkText.Contains(lastName) && headerLinkText.Contains(firstName))
+                        {
+                            Console.WriteLine("Check if Content Contains Company");
+                            if (content.Contains(companyString))
+                            {
+                                return url;
+                            }
+                            string[] excludedWords = new string[] { "and", "&", "-", ".", ",", "/", "\\", "@", "+" };
+
+                            var splitted = content.Split(' ');
+                            var result = splitted.Except(excludedWords);
+
+                            foreach (String s in result)
+                            {
+                                String term = s.Trim();
+                                if (content.Contains(term))
+                                {
+                                    return url;
+                                }
+                            }
+                            return url;
+                        }
+                    }
+                    catch (NoSuchElementException noEle)
+                    {
+                        Console.WriteLine(noEle.InnerException);
+                        Console.WriteLine(noEle.StackTrace);
+                    }
                 }
             }
+            catch(WebDriverException driverExc)
+            {
+                Console.WriteLine("Loading Timeout. Retrying...");
+                goto isapa;
+            }
 
-            throw new NotFoundException(String.Format("No suitable LinkedIn address found for {0} {1} of {2}.", firstName, lastName, companyString));
+            return "N/A";
         }
 
 
         private String GetLinkedInLocation(String url)
         {
+            Console.WriteLine("");
             _driver.Url = url;
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
 
@@ -321,13 +438,19 @@ namespace EmailChecker.v2
                 }
                 else
                 {
+                    Console.WriteLine("Email Check");
                     newRow[5] = IsEmailPublic(emailAddress) ? "Y" : "N";
                     newRow[6] = _foundUrl.IsNullOrEmptyOrWhiteSpace() ? "N/A" : _foundUrl;
 
                     try
                     {
+                        Console.WriteLine("LinkedIn Search");
                         String linkedInURL = SearchLinkedInURL(firstName, lastName, companyName);
-                        String location = GetLinkedInLocation(linkedInURL);
+                        String location = "N/A";
+                        if (linkedInURL.StartsWith("http"))
+                        {
+                            location = GetLinkedInLocation(linkedInURL);
+                        }
 
                         newRow[7] = String.Format("\"{0}\"", location);
                     }
@@ -340,7 +463,7 @@ namespace EmailChecker.v2
                 outputDataTable.Rows.Add(newRow);
                 progressBar.Value++;
 
-                if (i % 50 == 0)
+                if (i % 2 == 0)
                 {
                     bool isOk = await SaveCSV(outputDataTable);
                 }
@@ -357,25 +480,34 @@ namespace EmailChecker.v2
         async Task<bool> SaveCSV(DataTable dt)
         {
             Console.WriteLine("Saving...");
-
-            StringBuilder sb = new StringBuilder();
-
-            IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
-                                              Select(column => column.ColumnName);
-            sb.AppendLine(string.Join(",", columnNames));
-
-            foreach (DataRow row in dt.Rows)
+            retry:
+            try
             {
-                IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
-                sb.AppendLine(string.Join(",", fields));
-            }
 
-            using (TextWriter w = new StreamWriter(new BufferedStream(new FileStream(@"D:\test.csv", FileMode.Create))))
+                StringBuilder sb = new StringBuilder();
+
+                IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
+                                                  Select(column => column.ColumnName);
+                sb.AppendLine(string.Join(",", columnNames));
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
+                    sb.AppendLine(string.Join(",", fields));
+                }
+
+                using (TextWriter w = new StreamWriter(new BufferedStream(new FileStream(@"test.csv", FileMode.Create))))
+                {
+                    w.WriteLine(sb.ToString());
+                    w.Flush();
+                }
+
+            }
+            catch(IOException ioex)
             {
-                w.WriteLine(sb.ToString());
-                w.Flush();
-            }
-
+                Console.WriteLine("Loading Timeout. Retrying...");
+                goto retry;
+            } 
             return true;
         }
     }
