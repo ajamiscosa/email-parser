@@ -395,6 +395,13 @@ namespace EmailChecker.v2
 
             // LinkedIn Location Verification.
             // Step 1. Login to LinkedIn.
+            // TODO: 
+            // 1. Read text file with LinkedIn usernames and get one.
+            // 2. Random between the accounts
+            // 3. Get the creds.
+            // 4. username = username from random
+            // 5. password = password from random
+            // use it below v v v v    v v v v 
             LoginToLinkedIn(username, password);
 
             // Step 2. Load Input Excel.
@@ -501,6 +508,13 @@ namespace EmailChecker.v2
 
                     // LinkedIn Location Verification.
                     // Step 1. Login to LinkedIn.
+                    // TODO: 
+                    // 1. Read text file with LinkedIn usernames and get one.
+                    // 2. Random between the accounts
+                    // 3. Get the creds.
+                    // 4. username = username from random
+                    // 5. password = password from random
+                    // use it below v v v v    v v v v 
                     LoginToLinkedIn(username, password);
                 }
             }
