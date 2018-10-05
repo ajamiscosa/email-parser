@@ -36,6 +36,7 @@
             this.txtPath = new SwingWERX.Controls.InputBox(this.components);
             this.btnProcess = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
@@ -82,10 +83,12 @@
             // 
             // txtPath
             // 
+            this.txtPath.BackColor = System.Drawing.Color.White;
             this.txtPath.Font = new System.Drawing.Font("Segoe UI", 12.5F);
             this.txtPath.Location = new System.Drawing.Point(12, 97);
             this.txtPath.Name = "txtPath";
             this.txtPath.NullText = "Input Excel Path";
+            this.txtPath.ReadOnly = true;
             this.txtPath.Size = new System.Drawing.Size(274, 30);
             this.txtPath.TabIndex = 9;
             // 
@@ -108,11 +111,22 @@
             this.progressBar.Size = new System.Drawing.Size(312, 32);
             this.progressBar.TabIndex = 11;
             // 
+            // textBox1
+            // 
+            this.textBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.textBox1.Location = new System.Drawing.Point(12, 212);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(312, 195);
+            this.textBox1.TabIndex = 12;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(336, 216);
+            this.ClientSize = new System.Drawing.Size(336, 416);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnProcess);
             this.Controls.Add(this.txtPath);
@@ -139,6 +153,7 @@
         private SwingWERX.Controls.InputBox txtPath;
         private System.Windows.Forms.Button btnProcess;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

@@ -30,6 +30,14 @@ namespace EmailChecker.v2
             InitializeComponent();
 
             MessageBox.Show("Please make sure the LinkedIn account that you will be using is an actual LinkedIn account. This tool will not be able to process records without a working LinkedIn account.","Warning!",MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            textBox1.VisibleChanged += (sender, e) =>
+            {
+                if (textBox1.Visible)
+                {
+                    textBox1.SelectionStart = textBox1.TextLength;
+                    textBox1.ScrollToCaret();
+                }
+            };
         }
 
         private void LoadEvent(object sender, EventArgs e)
@@ -184,6 +192,55 @@ namespace EmailChecker.v2
                 {
                     Console.WriteLine("Find SRG.");
                     container = _driver.FindElementByClassName("srg");
+
+                    Console.WriteLine("SRG Found. Go through each.");
+                    foreach (IWebElement element in container.FindElements(By.ClassName("g")))
+                    {
+                        try
+                        {
+                            Console.WriteLine("Find R.");
+                            IWebElement headerEle = element.FindElement(By.ClassName("r"));
+                            String headerLinkText = headerEle.Text;
+
+                            Console.WriteLine("Find CITE.");
+                            String url = element.FindElement(By.TagName("cite")).Text;
+
+
+                            Console.WriteLine("Load Content");
+                            IWebElement contentEle = element.FindElement(By.ClassName("r"));
+                            String content = element.FindElement(By.ClassName("st")).Text;
+
+
+                            Console.WriteLine("Check if Content Contains Person Name");
+                            if (headerLinkText.Contains(lastName) && headerLinkText.Contains(firstName))
+                            {
+                                Console.WriteLine("Check if Content Contains Company");
+                                if (content.Contains(companyString))
+                                {
+                                    return url;
+                                }
+                                string[] excludedWords = new string[] { "and", "&", "-", ".", ",", "/", "\\", "@", "+" };
+
+                                var splitted = content.Split(' ');
+                                var result = splitted.Except(excludedWords);
+
+                                foreach (String s in result)
+                                {
+                                    String term = s.Trim();
+                                    if (content.Contains(term))
+                                    {
+                                        return url;
+                                    }
+                                }
+                                return url;
+                            }
+                        }
+                        catch (NoSuchElementException noEle)
+                        {
+                            Console.WriteLine(noEle.InnerException);
+                            Console.WriteLine(noEle.StackTrace);
+                        }
+                    }
                 }
                 catch (NoSuchElementException exc)
                 {
@@ -223,64 +280,13 @@ namespace EmailChecker.v2
                         }
                         catch (NoSuchElementException noEle)
                         {
-                            Console.WriteLine(noEle.InnerException);
-                            Console.WriteLine(noEle.StackTrace);
+                            return "N/A";
                         }
                     }
                 }
                 catch(WebDriverException webdrvex)
                 {
                     Console.WriteLine("WebDriverException on finding SRG.");
-                }
-
-
-                Console.WriteLine("SRG Found. Go through each.");
-                foreach (IWebElement element in container.FindElements(By.ClassName("g")))
-                {
-                    try
-                    {
-                        Console.WriteLine("Find R.");
-                        IWebElement headerEle = element.FindElement(By.ClassName("r"));
-                        String headerLinkText = headerEle.Text;
-
-                        Console.WriteLine("Find CITE.");
-                        String url = element.FindElement(By.TagName("cite")).Text;
-
-
-                        Console.WriteLine("Load Content");
-                        IWebElement contentEle = element.FindElement(By.ClassName("r"));
-                        String content = element.FindElement(By.ClassName("st")).Text;
-
-
-                        Console.WriteLine("Check if Content Contains Person Name");
-                        if (headerLinkText.Contains(lastName) && headerLinkText.Contains(firstName))
-                        {
-                            Console.WriteLine("Check if Content Contains Company");
-                            if (content.Contains(companyString))
-                            {
-                                return url;
-                            }
-                            string[] excludedWords = new string[] { "and", "&", "-", ".", ",", "/", "\\", "@", "+" };
-
-                            var splitted = content.Split(' ');
-                            var result = splitted.Except(excludedWords);
-
-                            foreach (String s in result)
-                            {
-                                String term = s.Trim();
-                                if (content.Contains(term))
-                                {
-                                    return url;
-                                }
-                            }
-                            return url;
-                        }
-                    }
-                    catch (NoSuchElementException noEle)
-                    {
-                        Console.WriteLine(noEle.InnerException);
-                        Console.WriteLine(noEle.StackTrace);
-                    }
                 }
             }
             catch(WebDriverException driverExc)
@@ -349,6 +355,7 @@ namespace EmailChecker.v2
         /// <param name="e"></param>
         private void StartProcess(object sender, EventArgs e)
         {
+            Console.SetOut(new ControlWriter(textBox1));
             Console.WriteLine(DoProcess());
         }
 
@@ -412,6 +419,11 @@ namespace EmailChecker.v2
             for (int i = 1; i < sourceDataTable.Rows.Count; i++)
             //for (int i = 1; i < 11; i++)
             {
+                int tries = 0;
+
+                retry:
+
+
                 DataRow entry = sourceDataTable.Rows[i];
                 String firstName = entry[0].ToString();
                 String lastName = entry[1].ToString();
@@ -438,12 +450,11 @@ namespace EmailChecker.v2
                 }
                 else
                 {
-                    Console.WriteLine("Email Check");
-                    newRow[5] = IsEmailPublic(emailAddress) ? "Y" : "N";
-                    newRow[6] = _foundUrl.IsNullOrEmptyOrWhiteSpace() ? "N/A" : _foundUrl;
-
                     try
                     {
+                        Console.WriteLine("Email Check");
+                        newRow[5] = IsEmailPublic(emailAddress) ? "Y" : "N";
+                        newRow[6] = _foundUrl.IsNullOrEmptyOrWhiteSpace() ? "N/A" : _foundUrl;
                         Console.WriteLine("LinkedIn Search");
                         String linkedInURL = SearchLinkedInURL(firstName, lastName, companyName);
                         String location = "N/A";
@@ -458,14 +469,39 @@ namespace EmailChecker.v2
                     {
                         newRow[7] = "N/A";
                     }
+                    catch (WebDriverException webDriverExc)
+                    {
+                        Console.WriteLine("Web Driver Exception. Retrying...");
+                        if(tries%3==0)
+                        {
+                            _driver.Quit();
+                            _driver = new ChromeDriver(service, options);
+
+                            // LinkedIn Location Verification.
+                            // Step 1. Login to LinkedIn.
+                            LoginToLinkedIn(username, password);
+                        }
+                        tries++;
+                        goto retry;
+                    }
                 }
                 Console.Write("\t{0}\t{1}\t{2}\n", newRow[5], newRow[6], newRow[7]);
                 outputDataTable.Rows.Add(newRow);
                 progressBar.Value++;
 
-                if (i % 2 == 0)
+                if (i % 50 == 0)
                 {
                     bool isOk = await SaveCSV(outputDataTable);
+                }
+
+                if (i % 250 == 0)
+                {
+                    _driver.Quit();
+                    _driver = new ChromeDriver(service, options);
+
+                    // LinkedIn Location Verification.
+                    // Step 1. Login to LinkedIn.
+                    LoginToLinkedIn(username, password);
                 }
             }
 
@@ -507,7 +543,7 @@ namespace EmailChecker.v2
             {
                 Console.WriteLine("Loading Timeout. Retrying...");
                 goto retry;
-            } 
+            }
             return true;
         }
     }
