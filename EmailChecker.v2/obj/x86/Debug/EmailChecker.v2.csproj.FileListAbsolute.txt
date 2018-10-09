@@ -16,3 +16,4 @@ C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChec
 C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\x86\Debug\EmailChecker.v2.csproj.GenerateResource.Cache
 C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\x86\Debug\EmailChecker.v2.exe
 C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\obj\x86\Debug\EmailChecker.v2.pdb
+C:\Users\ajamiscosa.PICL-50SHRF2\documents\visual studio 2017\Projects\EmailChecker\EmailChecker.v2\bin\x86\Debug\linkedinusers.csv

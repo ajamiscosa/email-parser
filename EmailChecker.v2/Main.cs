@@ -22,6 +22,11 @@ namespace EmailChecker.v2
         private String _foundUrl;
         private ChromeDriver _driver;
 
+        private static Random rnd = new Random();
+        private static string[] contents;
+        private static IEnumerable<string[]> csv;
+        private static int randnum;
+
         public Main()
         {
             Environment.SetEnvironmentVariable("webdriver.chrome.driver",
@@ -366,16 +371,16 @@ namespace EmailChecker.v2
 
             StringBuilder sb = new StringBuilder();
 
-            String username = txtUsername.Text;
-            String password = txtPassword.Text;
+            //String username = txtUsername.Text;
+            //String password = txtPassword.Text;
 
             String path = txtPath.Text;
 
-            if (username.IsNullOrEmptyOrWhiteSpace() || password.IsNullOrEmptyOrWhiteSpace())
-            {
-                MessageBox.Show("Valid LinkedIn account is required", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return -1;
-            }
+            //if (username.IsNullOrEmptyOrWhiteSpace() || password.IsNullOrEmptyOrWhiteSpace())
+            //{
+            //    MessageBox.Show("Valid LinkedIn account is required", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return -1;
+            //}
 
             if (path.IsNullOrEmptyOrWhiteSpace())
             {
@@ -401,7 +406,21 @@ namespace EmailChecker.v2
             // 3. Get the creds.
             // 4. username = username from random
             // 5. password = password from random
-            // use it below v v v v    v v v v 
+            // use it below v v v v    v v v v         static Random rnd = new Random();
+            contents = File.ReadAllText(String.Format(@"{0}\linkedinusers.csv", Environment.CurrentDirectory)).Split('\n');
+            csv = from line in contents
+                  select line.Split(',').ToArray();
+
+            string prevmail = "";
+            reshuffle:
+            randnum = rnd.Next(csv.Skip(1).Count() - 1);
+            if (csv.Skip(1).ElementAt(randnum)[0] == prevmail)
+            {
+                goto reshuffle;
+            }
+
+            String username = csv.Skip(1).ElementAt(randnum)[0];
+            String password = csv.Skip(1).ElementAt(randnum)[1];
             LoginToLinkedIn(username, password);
 
             // Step 2. Load Input Excel.
@@ -515,7 +534,23 @@ namespace EmailChecker.v2
                     // 4. username = username from random
                     // 5. password = password from random
                     // use it below v v v v    v v v v 
+                    contents = File.ReadAllText(String.Format(@"{0}\linkedinusers.csv",Environment.CurrentDirectory)).Split('\n');
+                    csv = from line in contents
+                          select line.Split(',').ToArray();
+
+                    string prevmail1 = "";
+                    reshuffle1:
+                    randnum = rnd.Next(csv.Skip(1).Count()-1);
+                    if (csv.Skip(1).ElementAt(randnum)[0] == prevmail1)
+                    {
+                        goto reshuffle1;
+                    }
+
+                    username = csv.Skip(1).ElementAt(randnum)[0];
+                    password = csv.Skip(1).ElementAt(randnum)[1];
+
                     LoginToLinkedIn(username, password);
+
                 }
             }
 
@@ -533,17 +568,23 @@ namespace EmailChecker.v2
             retry:
             try
             {
-
                 StringBuilder sb = new StringBuilder();
 
                 IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
                                                   Select(column => column.ColumnName);
                 sb.AppendLine(string.Join(",", columnNames));
 
+                int i = 0;
                 foreach (DataRow row in dt.Rows)
                 {
+                    String company = row[3].ToString();
+                    if (company.Contains(","))
+                    {
+                        row[3] = String.Format("\"{0}\"", company);
+                    }
                     IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
                     sb.AppendLine(string.Join(",", fields));
+                    i++;
                 }
 
                 using (TextWriter w = new StreamWriter(new BufferedStream(new FileStream(@"test.csv", FileMode.Create))))
@@ -551,7 +592,6 @@ namespace EmailChecker.v2
                     w.WriteLine(sb.ToString());
                     w.Flush();
                 }
-
             }
             catch(IOException ioex)
             {
